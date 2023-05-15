@@ -451,7 +451,7 @@ class IOSDevice extends Device {
         _logger.printError('');
         return LaunchResult.failed();
       }
-      packageId = buildResult.xcodeBuildExecution?.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
+      packageId = buildResult.xcodeBuildExecution?.buildSettings[IosProject.kProductBundleIdKey];
     }
 
     packageId ??= package.id;
@@ -496,7 +496,7 @@ class IOSDevice extends Device {
             deviceLogReader.debuggerStream = iosDeployDebugger;
           }
         }
-        // Don't port foward if debugging with a network device.
+        // Don't port foward if debugging with a wireless device.
         vmServiceDiscovery = ProtocolDiscovery.vmService(
           deviceLogReader,
           portForwarder: isWirelesslyConnected ? null : portForwarder,
@@ -546,6 +546,7 @@ class IOSDevice extends Device {
             "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again."
           );
         } else {
+          iosDeployDebugger?.checkForSymbolsFiles(_fileSystem);
           iosDeployDebugger?.pauseDumpBacktraceResume();
         }
       });
@@ -576,7 +577,7 @@ class IOSDevice extends Device {
           this,
           usesIpv6: ipv6,
           deviceVmservicePort: serviceURL.port,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
         );
 
         mDNSLookupTimer.cancel();
